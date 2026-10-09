@@ -1,0 +1,74 @@
+{% extends "chat/layout.html" %}
+{% load static %}
+
+{% block title %}Join{% endblock %}
+
+{% block style %}
+/*For pop-up animation*/
+#pos-cont {
+    transition: transform 0.2s;
+}
+#pos-cont:hover {
+    transform: scale(1.05);
+}
+{% endblock %}
+
+{% block body %}
+
+    <h1>Join in Z-Group</h1>
+
+    <!--it searches Z-group by getting either the Z-Name or Z-id as an input-->
+    <form action="{% url 'join' %}" method="post">
+        {% csrf_token %}
+        
+        <input id="sb" type="button" class="btn btn-link link-secondary link-underline-opacity-0 link-opacity-50-hover" value="Search by Z-ID" >
+
+        <input name="z-name" id="z-name" class="form-control" placeholder="Z-Name" autofocus>
+        <input name="z-id" id="z-id" class="form-control" placeholder="Z-ID" hidden=true autofocus>
+        <input type="submit" class="btn btn-outline-dark mt-3 mb-3" value="Search">
+
+    </form>
+
+     <!--It loads all the Z-Groups where the input matches-->
+    <div class="chats-container">
+        {% for group in res %}
+            <a href="{% url 'chat' room_name=group.z_id %}" style="text-decoration:none; color:black;">
+                <div class="group border shadow p-3 mb-5 bg-body-tertiary rounded" id="pos-cont">
+                    <p > {{ group.z_id }} </p>
+                    <p class="fs-5">{{ group.z_name }}</p>
+                    <p class="fw-light">{{ group.creator}}</p>
+                </div>
+            </a>
+
+        {% endfor %}
+    </div>
+
+
+<script>
+    sb = document.getElementById("sb");
+    z_name = document.getElementById("z-name");
+    z_id = document.getElementById("z-id");
+
+
+    //To get the input either from the Z-Name or Z-ID
+    sb.addEventListener("click", function(event) {
+
+        event.preventDefault();
+
+        if (sb.value == "Search by Z-ID") {
+            sb.value = "Search by Z-Name";
+            z_name.hidden = true;
+            z_id.hidden = false;
+        }
+        else {
+            sb.value = "Search by Z-ID";
+            z_id.hidden = true;
+            z_name.hidden = false;
+        }
+
+    })
+
+
+</script>
+
+{% endblock %}

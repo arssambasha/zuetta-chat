@@ -1,0 +1,47 @@
+{% extends "chat/layout.html" %}
+{% load static %}
+
+{% block style %}
+/*For pop-up animation*/
+#pos-cont {
+    transition: transform 0.2s;
+}
+#pos-cont:hover {
+    transform: scale(1.05);
+}
+{% endblock %}
+
+
+{% block body %}
+
+    <!--It loads all the Z-Groups where the user was messaged-->
+    <div class="chats-container">
+        {% for group in page_obj %}
+            <a href="{% url 'chat' room_name=group.z_id %}" style="text-decoration:none; color:black;" >
+                <div class="group border shadow p-3 mb-5 bg-body-tertiary rounded" id="pos-cont">
+                    <p> {{ group.z_id }} </p>
+                    <p class="fs-5">{{ group.z_name }}</p>
+                    <p class="fw-light">{{ group.creator}}</p>
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+
+   <!--Pagination-->
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <a href="?page=1" class="page-link text-dark">&laquo;</a>
+            <a href="?page={{ page_obj.previous_page_number }}" class="page-link text-dark">{{ page_obj.previous_page_number }}</a>
+        {% endif %}
+
+            <span class="page-link bg-dark text-light">{{ page_obj.number }}</span>
+        
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="page-link text-dark">{{ page_obj.next_page_number }}</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}" class="page-link text-dark">&raquo;</a>
+        {% endif %}
+    </ul>
+  
+  
+{% endblock %}

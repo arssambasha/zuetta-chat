@@ -1,0 +1,34 @@
+{% extends "chat/layout.html" %}
+{% load static %}
+
+{% block body %}
+<!--Register page-->
+    <p class="display-5 mt-4">Welcome to the Zuetta Chat!</p>
+    <p class="fw-light">where you can chat with the world!</p>
+
+    <h2>Register</h2>
+
+    {% if message %}
+        <div>{{ message }}</div>
+    {% endif %}
+
+    <form action="{% url 'register' %}" method="post">
+        {% csrf_token %}
+        <div class="form-group mt-2">
+            <input class="form-control" autofocus type="text" name="username"  placeholder="Username">
+        </div>
+        <div class="form-group mt-2">
+            <input class="form-control" type="email" name="email" placeholder="Email Address">
+        </div>
+        <div class="form-group mt-2">
+            <input class="form-control" type="password" name="password" placeholder="Password">
+        </div>
+        <div class="form-group mt-2">
+            <input class="form-control" type="password" name="confirmation" placeholder="Confirm Password">
+        </div>
+        <input class="btn btn-secondary mt-2" type="submit" value="Register">
+    </form>
+
+    Already have an account? <a href="{% url 'login' %}" class="link-secondary link-underline-opacity-25 link-opacity-50-hover">Log In here.</a>
+
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "chat/layout.html" %}
+{% load static %}
+
+{% block body %}
+    <p class="display-5 mt-4">Welcome to the Zuetta Chat!</p>
+    <p class="fw-light">where you can chat with the world!</p>
+
+    {% if user.is_authenticated == False %}
+    <div>
+        <a href="{% url 'login' %}" class="btn btn-secondary mt-2">Log in</a>
+        <a href="{% url 'register' %}" class="btn btn-secondary mt-2">Sign up</a>
+    </div>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "chat/layout.html" %}
+{% load static %}
+
+{% block title %}Create{% endblock %}
+
+{% block body %}
+
+    <h1>Create a Z-Group</h1>
+    
+    <!--Used to create a new Z-Group-->
+    <form action="{% url 'create' %}" id="sf" method="post">
+        {% csrf_token %}
+
+        <input name="z-name" class="form-control mt-3" placeholder="Z-Name" autofocus>
+        <input name="z-id" id="z-id" class="form-control mt-3" placeholder="Z-ID">
+        <p id="em" class="fw-light">{{ error_message }}</p>
+        <input type="submit" class="btn btn-outline-secondary" value="Create" >
+    </form>
+    
+
+    <script>
+        sf = document.getElementById("sf");
+
+        //alphanumerics only
+        let regex = /^[a-z0-9_]+$/;
+
+        //It checks z-id by regex, then for empty input
+        sf.addEventListener("submit", function (event) {
+            
+            if (!regex.test(sf.elements["z-id"].value) || sf.elements["z-name"].value == "" || sf.elements["z-id"].value == "") {
+                event.preventDefault();
+                document.getElementById("em").innerHTML = "Please enter valid characters";
+            }
+        })
+
+    </script>
+
+{% endblock %}

@@ -1,0 +1,137 @@
+{% extends "chat/layout.html" %}
+{% load static %}
+
+{% block title %}Chat{% endblock %}
+{% block body %}
+
+    <!--About the Z-group-->
+    <div>
+        <p class="display-4"><strong>{{z_group.z_name}}</strong></p>
+        <p><strong>{{z_group.z_id}}</strong></p>
+        <p class="fw-light" >Created by : {{z_group.creator}}</p>
+    </div>
+
+    <!--Message input-->
+    <div class="text-center">
+    <textarea id="chat-input" class="form-control" placeholder="Type your message...." required autofocus></textarea>
+    <input id="chat-submit" class="btn btn-outline-secondary mt-3" type="button" value="send">
+    </div>
+
+    <!--Getting the roomname and username-->
+    {{ room_name|json_script:"room-name" }}
+    {{ request.user.username|json_script:"user-name" }}
+    
+    <!--where the message will be added-->
+    <div id="user-hello">
+        <p></p>
+    </div>
+
+    <script>
+        const roomName = JSON.parse(document.getElementById('room-name').textContent);
+        const userName = JSON.parse(document.getElementById('user-name').textContent);
+
+        document.querySelector('#chat-input').onkeyup = function(e) {
+            if (e.key === 'Enter') { 
+                document.querySelector('#chat-submit').click();
+            }
+        };
+
+        //WebSocket
+        const chatSocket = new WebSocket(
+            'ws://' + window.location.host + '/ws/chat/' + roomName + '/'
+        );
+
+
+        document.getElementById("chat-submit").onclick = (e) => {
+            let inputValue = document.getElementById('chat-input').value;
+
+            //if the message is empty then exit
+            if (inputValue === '') return;
+    
+            document.getElementById('chat-input').value= '';
+
+            //Message is sent in WebSocket
+            chatSocket.send(JSON.stringify({
+                'message': inputValue
+            }))
+        }
+
+        //When the message through the WebSocket, it adds the post into the div through add_post()
+        chatSocket.onmessage = (event) => {
+
+            const data = JSON.parse(event.data);
+            const message = data.message;
+            const username = data.username;
+            const timestamp = data.timestamp;
+
+            add_post(username, message, timestamp, true);
+        }
+
+        //loads 25 messages per request
+        let counter = 0;
+
+        const quantity = 25;
+
+        let loading = false;
+
+        document.addEventListener('DOMContentLoaded', load);
+
+        //It is used to load the messages when the window reaches the bottom of the browser
+        window.onscroll = () => {
+            if (!loading && window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+                loading = true;
+                load();
+            }
+        }
+
+        //this function fetches the messages from the db asynchronously and adds the post into the div through add_post()
+        function load() {
+
+            const start = counter;
+            const end = start + quantity - 1;
+            counter = end + 1;
+
+            fetch(`/messages?start=${start}&end=${end}&group=${roomName}`)
+            .then(response => response.json())
+            .then(data => {
+                data.messages.forEach(message => add_post(message.username, message.content, message.timestamp));
+                loading = false;
+            })
+        }
+
+        //format timestamp
+        function formatTimestamp(iso) {
+            return new Intl.DateTimeFormat('en-IN', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true,
+            }).format(new Date(iso));
+        }
+
+        //This function adds the message
+        function add_post(username, content, timestamp, s=false) {
+
+            const mes = document.createElement('div');
+            mes.className = 'border shadow p-3 mb-5 bg-body-tertiary rounded';
+            mes.innerHTML = `<p>${username}</p><p class="text-break fs-5">${content}</p><p class="fw-light">${formatTimestamp(timestamp)}</p>`;
+
+
+            let container = document.querySelector('#user-hello')
+
+            //when the message is from WebSocket it adds it to the recent section (top)
+            if (s) {
+                mes.className += ' mt-3';
+                container.insertBefore(mes, container.firstChild);
+            }
+            //otherwise adds at the end
+            else {
+                container.append(mes);
+            }
+        }
+
+    </script>
+{% endblock %}

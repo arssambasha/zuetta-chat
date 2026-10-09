@@ -1,0 +1,9 @@
+asgiref==3.7.2
+channels==4.0.0
+channels-redis
+daphne
+Django==5.0
+django-redis
+mysqlclient
+python-dotenv
+redis
